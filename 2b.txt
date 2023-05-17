@@ -1,0 +1,60 @@
+import pandas as pd
+import seaborn as sns
+import numpy as np
+import matplotlib.pyplot as plt
+
+df = pd.read_csv("/content/heart (1).csv") 
+df
+
+df.isnull().sum()
+
+df.dtypes
+
+df["oldpeak"]=df["oldpeak"].astype(int)
+
+df.head()
+
+df.shape
+
+countFemale = len(df[df.sex == 0])
+countMale = len(df[df.sex == 1])
+print("Percentage of Female patients  : {:.2f}%".format((countFemale)/(len(df.target))*100))
+print("Percentage of Male patients  : {:.2f}%".format((countMale)/(len(df.target))*100))
+
+countNoDisease = len(df[df.target == 0])
+countHaveDisease = len(df[df.target == 1])
+print("Percentage of patients dont have heart disease  : {:.2f}%".format((countNoDisease)/(len(df.target))*100))
+print("Percentage of patients have heart disease  : {:.2f}%".format((countNoDisease)/(len(df.target))*100))
+
+df.groupby('target').mean()
+
+summary_df = df['age'].agg(['mean','std','min','max'])
+summary_df
+
+a = pd.get_dummies(df['cp'],prefix = 'cp')
+b = pd.get_dummies(df['thal'],prefix = 'thal')
+c = pd.get_dummies(df['slope'],prefix = 'slope')
+
+frames = [df,a,b,c]
+df = pd.concat(frames,axis=1)
+df.head()
+
+df = df.drop(columns = ['cp','thal','slope'])
+df.head()
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+y=df.target.values
+x_data = df.drop(['target'],axis=1)
+
+x = (x_data -np.min(x_data)) / (np.max(x_data) - np.min(x_data)).values
+
+x_train, x_test ,y_train ,y_test = train_test_split(x,y,test_size =0.2,random_state=0)
+
+clf=LogisticRegression()
+clf.fit(x_train,y_train)
+y_pred = clf.predict(x_test)
+accuracy =accuracy_score(y_test,y_pred)
+print('Accuracy:',accuracy)
